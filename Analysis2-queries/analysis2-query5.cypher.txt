@@ -1,0 +1,20 @@
+MATCH (lib:Artifact)-[:relationship_AR]->(rel:Release)
+WITH lib, COLLECT(rel.timestamp) AS releaseTimestamps
+UNWIND releaseTimestamps AS timestamp
+WITH lib, timestamp,
+[t IN releaseTimestamps WHERE t > timestamp | t] AS futureTimestamps
+UNWIND futureTimestamps AS futureTimestamp
+WITH lib, timestamp, futureTimestamp, (futureTimestamp - timestamp) AS timeDifference
+WITH lib, AVG(timeDifference) AS avgTimeDifferenceMillis
+WITH lib,
+avgTimeDifferenceMillis,
+avgTimeDifferenceMillis / 86400000 AS avgTimeDifferenceDays,
+avgTimeDifferenceMillis / (86400000 * 30) AS avgTimeDifferenceMonths,
+avgTimeDifferenceMillis / (86400000 * 365) AS avgTimeDifferenceYears
+RETURN
+id(lib) AS identity,
+labels(lib) AS labels,
+lib.id AS libraryId,
+avgTimeDifferenceDays AS avgTimeBetweenReleasesDays,
+avgTimeDifferenceMonths AS avgTimeBetweenReleasesMonths,
+avgTimeDifferenceYears AS avgTimeBetweenReleasesYears

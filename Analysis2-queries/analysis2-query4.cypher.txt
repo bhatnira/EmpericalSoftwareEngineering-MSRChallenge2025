@@ -1,0 +1,5 @@
+// Count the number of releases per year
+MATCH (rel:Release)
+WITH apoc.date.format(rel.timestamp, 'ms', 'yyyy') AS year
+RETURN year, COUNT(*) AS numReleases
+ORDER BY year ASC
